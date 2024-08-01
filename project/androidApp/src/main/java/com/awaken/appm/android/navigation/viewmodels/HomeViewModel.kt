@@ -98,48 +98,6 @@ class HomeViewModel(val context: Context) : ViewModel() {
             resetCheckIsOnline()
             if (isOnline(context)) {
                 showDialog()
-                val responseMoney = try {
-                    SheetApiClient.apiService.getMoney(
-                        SharedPrefsHelper(context).getLink(),
-                        MonthNameHelper().getCurrentMonthName(),
-                        2,
-                        13,
-                        1,
-                        1
-                    )
-                } catch (e: IOException) {
-                    delay(1000L)
-                    _toastMessage.value = "Проверьте подключение к интернету"
-                    null
-                } catch (e: HttpException) {
-                    _toastMessage.value = "Проверьте правильность ссылки: " + e.code()
-                    null
-                } catch (e: Exception) {
-                    _toastMessage.value = "Проверьте правильность таблицы"
-                    null
-                }
-
-                if (responseMoney != null) {
-                    if (responseMoney.isSuccessful) {
-                        val responseModel = responseMoney.body()
-                        if (responseModel?.error != null) {
-                            _toastMessage.value =
-                                "Проверьте правильность ссылки: " + responseModel.error
-                        } else {
-
-                            if (responseModel != null) {
-                                moneyFromSheet.value = responseModel.data[0][0]
-                            }
-                        }
-                    } else {
-                        _toastMessage.value =
-                            "Проверьте правильность ссылки, error: " + responseMoney.code()
-                    }
-                } else {
-                    _toastMessage.value = "Ошибка"
-                }
-
-
                 val responseDohod = try {
                     SheetApiClient.apiService.getCategories(
                         SharedPrefsHelper(context).getLink(),
@@ -238,8 +196,49 @@ class HomeViewModel(val context: Context) : ViewModel() {
                 } else {
                     _toastMessage.value = "Ошибка"
                 }
-
                 hideDialog()
+
+                val responseMoney = try {
+                    SheetApiClient.apiService.getMoney(
+                        SharedPrefsHelper(context).getLink(),
+                        MonthNameHelper().getCurrentMonthName(),
+                        2,
+                        13,
+                        1,
+                        1
+                    )
+                } catch (e: IOException) {
+                    delay(1000L)
+                    _toastMessage.value = "Проверьте подключение к интернету"
+                    null
+                } catch (e: HttpException) {
+                    _toastMessage.value = "Проверьте правильность ссылки: " + e.code()
+                    null
+                } catch (e: Exception) {
+                    _toastMessage.value = "Проверьте правильность таблицы"
+                    null
+                }
+
+                if (responseMoney != null) {
+                    if (responseMoney.isSuccessful) {
+                        val responseModel = responseMoney.body()
+                        if (responseModel?.error != null) {
+                            _toastMessage.value =
+                                "Проверьте правильность ссылки: " + responseModel.error
+                        } else {
+
+                            if (responseModel != null) {
+                                moneyFromSheet.value = responseModel.data[0][0]
+                            }
+                        }
+                    } else {
+                        _toastMessage.value =
+                            "Проверьте правильность ссылки, error: " + responseMoney.code()
+                    }
+                } else {
+                    _toastMessage.value = "Ошибка"
+                }
+
             } else {
                 hideDialog()
                 _toastMessage.value = "Проверьте подключение к интернету"
@@ -278,6 +277,9 @@ class HomeViewModel(val context: Context) : ViewModel() {
                 if (postResponce.isSuccessful) {
                     val responseModel = postResponce.body()
                     if (responseModel?.status == "success") {
+                        selectedCategory.value = ""
+                        currentMoney.value = ""
+                        currentComment.value = ""
                         _toastMessage.value = "Таблица успешно обновлена: " + responseModel.status
                     } else {
                         _toastMessage.value = "Ошибка: " + responseModel?.status

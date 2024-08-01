@@ -193,12 +193,11 @@ fun HomePage(navController: NavController, onThemeUpdated: () -> Unit) {
 
                 val a = homeViewModel.selectedCategory.collectAsState().value.isNotEmpty()
                 val c = homeViewModel.currentMoney.collectAsState().value.isNotEmpty()
-                val d = homeViewModel.currentComment.collectAsState().value.isNotEmpty()
 
                 Button(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     onClick = {
-                        if(a && c && d){
+                        if(a && c){
                             coroutineScope.launch(Dispatchers.Default) {
                                 homeViewModel.createWrite()
                             }
@@ -218,8 +217,18 @@ fun HomePage(navController: NavController, onThemeUpdated: () -> Unit) {
 
     if(openDialog.value) {
         AlertDialog(
-            title = { Text(text = "Подтверждение действия") },
-            text = { Text("У вас заполнены не все поля. Всё равно отправить?") },
+            title = { Text(text = "Заполнены не все поля") },
+            text = {
+                if(homeViewModel.selectedCategory.collectAsState().value.isEmpty() && homeViewModel.currentMoney.collectAsState().value.isEmpty()){
+                    Text("Вы не указали категорию и сумму. Всё равно записать?")
+                }
+                else if(homeViewModel.selectedCategory.collectAsState().value.isEmpty()){
+                    Text("Вы не указали категорию. Всё равно записать?")
+                }
+                else if(homeViewModel.currentMoney.collectAsState().value.isEmpty()){
+                    Text("Вы не указали сумму. Всё равно записать?")
+                }
+                   },
             onDismissRequest = { openDialog.value = false },
             confirmButton = {
                 Button(
